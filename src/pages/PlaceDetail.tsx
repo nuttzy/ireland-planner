@@ -2,6 +2,7 @@ import React from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { usePlaces } from '../hooks/useData'
 import { marked } from 'marked'
+import { assetUrl } from '../utils/assetUrl'
 
 // EAGER: string values, no Promises
 const pages = import.meta.glob('../content/*.md', {
@@ -61,7 +62,7 @@ const PlaceDetail: React.FC = () => {
         <>
 
           <img 
-            src={place.image || '/assets/placeholder.jpg'}
+            src={assetUrl(place.image || '/assets/placeholder.jpg')}
             alt=""
             className="hero-img"
             style={{ width:'100%', maxHeight:280, objectFit:'cover', borderRadius:12, marginTop:8 }}
@@ -79,7 +80,7 @@ const PlaceDetail: React.FC = () => {
               role="dialog"
             >
               <img
-                src={place.image}
+                src={assetUrl(place.image)}
                 alt=""
                 className="lightbox-img"
                 onClick={e => e.stopPropagation()} // don't close when clicking the image itself
@@ -93,7 +94,7 @@ const PlaceDetail: React.FC = () => {
               </button>
               <a
                 className="lightbox-open btn"
-                href={place.image}
+                href={assetUrl(place.image)}
                 target="_blank"
                 rel="noopener noreferrer"
               >

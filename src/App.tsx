@@ -5,6 +5,7 @@ import { ImageOverlay, Pane } from 'react-leaflet'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Place } from './types'
 import { useItinerary } from './hooks/useItinerary'
+import { assetUrl } from './utils/assetUrl'
 
 import { useSourceFilters } from './hooks/useSourceFilters';
 import { SourceFilterBar } from './components/SourceFilterBar';
@@ -130,7 +131,7 @@ const ResetController: React.FC = () => {
 const TooltipBody: React.FC<{ place: Place }> = ({ place }) => (
   <>
     <div>
-      <img className="tooltip-img" src={place.image} alt="" />
+      <img className="tooltip-img" src={assetUrl(place.image || '/assets/placeholder.jpg')} alt="" />
       <div style={{ fontWeight: 700 }}>{place.name}</div>
       <div className="muted" style={{ maxWidth: 220 }}>{place.shortDesc}</div>
     </div>
@@ -265,7 +266,7 @@ const App: React.FC = () => {
 
         <Pane name="basemap" style={{ zIndex: 200 }}>
           <ImageOverlay
-            url="/assets/ireland-vintage02.jpeg"
+            url={assetUrl('/assets/ireland-vintage02.jpeg')}
             bounds={[[51.39, -10.66], [55.43, -5.43]]}   // SW, NE corners of Ireland (with a little padding)
             opacity={0.95}
           />
@@ -277,7 +278,6 @@ const App: React.FC = () => {
 
         {/* {(places as any[]).map(p => { */}
         {(visible as any[]).map(p => {
-          const img = p.image || '/assets/placeholder.jpg'
           const assignedDay = p.type === 'poi' ? getDayForPoi(p.id) : null
           // const isFocused = focusId === p.id
           const isFocused = !!focusId && focusId === p.id

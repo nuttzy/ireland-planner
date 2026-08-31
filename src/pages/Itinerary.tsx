@@ -2,6 +2,7 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import { useItinerary } from '../hooks/useItinerary'
 import { usePlaces } from '../hooks/useData'
+import { assetUrl } from '../utils/assetUrl'
 
 const Itinerary: React.FC = () => {
   const { days } = useItinerary()
@@ -45,7 +46,7 @@ const Itinerary: React.FC = () => {
                       <article className="poi-row" key={p.id}>
                         {/* Left: image */}
                         <img
-                          src={p.image || '/assets/placeholder.jpg'}
+                          src={assetUrl(p.image || '/assets/placeholder.jpg')}
                           alt=""
                           className="poi-row-thumb"
                         />
@@ -80,7 +81,7 @@ const Itinerary: React.FC = () => {
                 {stay && (
                   <article className="stay-card">
                     <img
-                      src={stay.image || '/assets/placeholder.jpg'}
+                      src={assetUrl(stay.image || '/assets/placeholder.jpg')}
                       alt=""
                       className="stay-thumb"
                     />

@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { BrowserRouter, Routes, Route, Link /*, useLocation, useSearchParams */ } from 'react-router-dom'
+import { HashRouter, Routes, Route, Link /*, useLocation, useSearchParams */ } from 'react-router-dom'
 import './styles/global.css'
 import App from './App'
 import IndexPage from './pages/IndexPage'
@@ -12,7 +12,7 @@ import PwaStatus from './components/PwaStatus'
 // const [, setSearchParams] = useSearchParams()
 
 const Root = () => (
-  <BrowserRouter>
+  <HashRouter>
     <div className="topbar">
       <Link to="/" style={{ color: 'white', fontWeight: 700 }}>Our Ireland Trip</Link>
 
@@ -41,7 +41,7 @@ const Root = () => (
       <Route path="/editor" element={<Editor />} />
       <Route path="/itinerary" element={<Itinerary />} />
     </Routes>
-  </BrowserRouter>
+  </HashRouter>
 )
 
 ReactDOM.createRoot(document.getElementById('root')!).render(<Root />)

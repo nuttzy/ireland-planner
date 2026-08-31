@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
+  base: '/ireland-planner/',
   plugins: [
     VitePWA({
       filename: 'service-worker.js',

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { SourceType, Place } from '../types'
 import { usePlaces } from '../hooks/useData'
 import { useItinerary } from '../hooks/useItinerary'
+import { assetUrl } from '../utils/assetUrl'
 
 import { useSourceFilters } from '../hooks/useSourceFilters';
 import { SourceFilterBar } from '../components/SourceFilterBar';
@@ -119,7 +120,7 @@ const IndexPage: React.FC = () => {
 
               <div style={{ marginTop: 8, display: 'flex', gap: 12, alignItems: 'center' }}>
                 <img
-                  src={p.image || '/assets/placeholder.jpg'}
+                  src={assetUrl(p.image || '/assets/placeholder.jpg')}
                   alt=""
                   style={{ width: 120, height: 72, objectFit: 'cover', borderRadius: 8 }}
                 />
