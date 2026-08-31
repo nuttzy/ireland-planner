@@ -23,7 +23,25 @@ import castleGrayPng from '/src/icons/pin-castle-gray.png'
 
 const DEFAULT_CENTER: [number, number] = [53.4, -8.2]
 const DEFAULT_ZOOM = 7
+const HOVER_QUERY = '(hover: hover) and (pointer: fine)'
 const places = placesData as Place[]
+
+const useSupportsHover = () => {
+  const [supportsHover, setSupportsHover] = React.useState(() =>
+    window.matchMedia(HOVER_QUERY).matches
+  )
+
+  React.useEffect(() => {
+    const mediaQuery = window.matchMedia(HOVER_QUERY)
+    const handleChange = (event: MediaQueryListEvent) => setSupportsHover(event.matches)
+
+    setSupportsHover(mediaQuery.matches)
+    mediaQuery.addEventListener('change', handleChange)
+    return () => mediaQuery.removeEventListener('change', handleChange)
+  }, [])
+
+  return supportsHover
+}
 
 const makeIcon = (url: string) =>
   new L.Icon({
@@ -87,25 +105,36 @@ const FitBounds: React.FC = () => {
   return null
 }
 
-const FocusController: React.FC<{ places: any[] }> = ({ places }) => {
+const FocusController: React.FC<{
+  places: Place[]
+  onFocusReady: (id: string) => void
+}> = ({ places, onFocusReady }) => {
   const map = useMap()
-  const [searchParams, setSearchParams] = useSearchParams()
+  const [searchParams] = useSearchParams()
   const focusId = searchParams.get('focus')
 
   React.useEffect(() => {
     if (!focusId) return
     const target = places.find(p => p.id === focusId)
     if (!target) return
-    const targetZoom = Math.max(map.getZoom(), 9)
-    map.flyTo([target.lat, target.lng], targetZoom, { duration: 0.75 })
 
-    // const t = setTimeout(() => {
-    //   const next = new URLSearchParams(searchParams)
-    //   next.delete('focus')
-    //   setSearchParams(next)
-    // }, 6000)
-    // return () => clearTimeout(t)
-  }, [focusId, places, map, searchParams, setSearchParams])
+    let didOpen = false
+    const openFocusedPopup = () => {
+      if (didOpen) return
+      didOpen = true
+      onFocusReady(focusId)
+    }
+
+    const targetZoom = Math.max(map.getZoom(), 9)
+    map.once('moveend', openFocusedPopup)
+    map.flyTo([target.lat, target.lng], targetZoom, { duration: 0.75 })
+    const fallbackTimer = window.setTimeout(openFocusedPopup, 1000)
+
+    return () => {
+      map.off('moveend', openFocusedPopup)
+      window.clearTimeout(fallbackTimer)
+    }
+  }, [focusId, places, map, onFocusReady])
 
   return null
 }
@@ -144,7 +173,7 @@ const TOOLTIP_BOTTOM_OFFSET: [number, number] = [0, 18]
 const TOOLTIP_TOP_GAP = 42
 const TOOLTIP_BOTTOM_GAP = 18
 
-const BoundaryAwareTooltip: React.FC<{ place: Place; permanent: boolean }> = ({ place, permanent }) => {
+const BoundaryAwareTooltip: React.FC<{ place: Place }> = ({ place }) => {
   const map = useMap()
   const tooltipRef = React.useRef<L.Tooltip | null>(null)
   const frameRef = React.useRef<number | null>(null)
@@ -197,7 +226,6 @@ const BoundaryAwareTooltip: React.FC<{ place: Place; permanent: boolean }> = ({ 
       direction="top"
       offset={TOOLTIP_TOP_OFFSET}
       opacity={1}
-      permanent={permanent}
       eventHandlers={{ add: schedulePosition }}
     >
       <TooltipBody place={place} />
@@ -209,6 +237,13 @@ const App: React.FC = () => {
   const { dayLabels, getDayForPoi, assignPoiToDay } = useItinerary()
   const [searchParams, setSearchParams] = useSearchParams()
   const focusId = searchParams.get('focus')
+  const supportsHover = useSupportsHover()
+  const [openPopupId, setOpenPopupId] = React.useState<string | null>(null)
+  const markerRefs = React.useRef(new Map<string, L.Marker>())
+
+  const openFocusedPopup = React.useCallback((id: string) => {
+    markerRefs.current.get(id)?.openPopup()
+  }, [])
 
   const { selected, counts, toggle, selectAll, setOnly, filterPlaces, ALL_SOURCES } =
     useSourceFilters(places);  
@@ -262,7 +297,7 @@ const App: React.FC = () => {
         zoom={DEFAULT_ZOOM} 
         style={{ height: '100%', width: '100%', background: '#f3f4f6' }} 
         zoomControl={true}>
-        <FocusController places={places} />
+        <FocusController places={places} onFocusReady={openFocusedPopup} />
 
         <Pane name="basemap" style={{ zIndex: 200 }}>
           <ImageOverlay
@@ -288,22 +323,36 @@ const App: React.FC = () => {
           if (isFocused) icon = poiIconGreen
 
           return (
-            <Marker key={p.id} position={[p.lat, p.lng]} icon={icon}>
-              {/* { isFocused && (
-              <Tooltip direction="top" opacity={1} offset={[0, -32]} 
-                key={`focus-${p.id}-${focusId}`}
-                permanent
-                className="focus-tooltip"
-                >
-                <TooltipBody place={p} />
-              </Tooltip>
-              )} */}
-
-              <BoundaryAwareTooltip place={p} permanent={isFocused} />
+            <Marker
+              key={p.id}
+              ref={marker => {
+                if (marker) markerRefs.current.set(p.id, marker)
+                else markerRefs.current.delete(p.id)
+              }}
+              position={[p.lat, p.lng]}
+              icon={icon}
+              eventHandlers={{
+                popupopen: event => {
+                  ;(event.target as L.Marker).closeTooltip()
+                  setOpenPopupId(p.id)
+                },
+                popupclose: () => {
+                  setOpenPopupId(current => current === p.id ? null : current)
+                },
+              }}
+            >
+              {supportsHover && openPopupId === null && (
+                <BoundaryAwareTooltip place={p} />
+              )}
 
 
               <Popup>
                 <div style={{ maxWidth: 240 }}>
+                  <img
+                    className="popup-img"
+                    src={assetUrl(p.image || '/assets/placeholder.jpg')}
+                    alt=""
+                  />
                   <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                     <div className="pill">{p.type === 'stay' ? 'Stay' : 'POI'}</div>
                     {p.type === 'poi' && (
