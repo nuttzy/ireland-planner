@@ -1,0 +1,63 @@
+/* .filters { margin: 0 0 12px; }
+.filters-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.pill {
+  border: 1px solid var(--border, #d0d0d0);
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: #fff;
+  font-size: 0.9rem;
+}
+.pill.active { background: #0b5; color: #fff; border-color: #0b5; }
+.pill.util { background: #eef; border-color: #ccd; }
+.count { opacity: 0.75; margin-left: 6px; font-variant-numeric: tabular-nums; }
+.spacer { flex: 1; min-width: 8px; }
+.solo { display: flex; gap: 6px; }
+.solo-btn { background: #f6f6f6; } */
+
+/* .source-filter-bar .row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:6px; }
+.pill { border:1px solid #d0d0d0; border-radius:999px; padding:6px 10px; background:#fff; font-size:.9rem; }
+.pill.active { background:#0b5; color:#fff; border-color:#0b5; }
+.pill.util { background:#eef; border-color:#ccd; }
+.pill.solo { background:#f6f6f6; }
+.count { margin-left:6px; opacity:.75; font-variant-numeric: tabular-nums; } */
+
+/* single-row toolbar */
+.source-filter-bar.one-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: space-between; /* left group vs right group */
+  padding: 6px;
+  background: rgba(255,255,255,.9);
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  /* keep it one line; allow horizontal scroll on small screens */
+  white-space: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* groups */
+.source-filter-bar .group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.source-filter-bar .group.right {
+  margin-left: auto;          /* push to the far right */
+  justify-content: flex-end;  /* right-justify within its own group */
+}
+
+/* pills */
+.pill {
+  border: 1px solid #d0d0d0;
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: #fff;
+  font-size: 0.9rem;
+}
+.pill.active { background: #0b5; color: #fff; border-color: #0b5; }
+.pill.util   { background: #eef; border-color: #ccd; }
+.pill.solo   { background: #f6f6f6; }
+
+.count { margin-left: 6px; opacity: .75; font-variant-numeric: tabular-nums; }

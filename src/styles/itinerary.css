@@ -1,0 +1,115 @@
+/* Layout wrappers */
+.itinerary-days { display: grid; gap: 16px; }
+.day-card { padding: 16px; }
+
+/* Day header */
+.day-header { display: flex; align-items: center; justify-content: space-between; }
+.day-title { margin: 0; }
+
+/* Section headings */
+.section-heading {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 8px; margin-bottom: 8px;
+}
+.section-heading.prominent h3 {
+  font-size: 1.125rem; /* a bit larger */
+}
+.section-heading.prominent .pill {
+  background: #0b4f6c; color: white; /* accent for evening stay */
+}
+
+/* POI grid */
+.poi-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+@media (min-width: 720px) {
+  .poi-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1024px) {
+  .poi-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+.poi-card {
+  display: grid; grid-template-columns: 128px 1fr; gap: 12px;
+  align-items: center;
+}
+.poi-thumb {
+  width: 128px; height: 80px; object-fit: cover; border-radius: 8px;
+}
+.poi-body { display: grid; gap: 6px; }
+.poi-line1 { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.poi-name { font-weight: 600; }
+.poi-desc { line-height: 1.35; }
+.poi-actions { margin-top: 2px; }
+
+/* Evening Stay card (more pronounced) */
+.evening-stay { margin-top: 12px; }
+.stay-card {
+  display: grid; grid-template-columns: 160px 1fr; gap: 14px;
+  padding: 12px; border: 1px solid rgba(0,0,0,.08); border-radius: 12px;
+  background: rgba(11,79,108,0.06); /* subtle accent wash */
+}
+.stay-thumb {
+  width: 160px; height: 96px; object-fit: cover; border-radius: 10px;
+}
+.stay-body { display: grid; gap: 8px; }
+.stay-line1 { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.stay-name { font-weight: 700; font-size: 1.05rem; }
+.stay-pill { background: #0b4f6c; color: white; }
+.stay-actions { margin-top: 2px; }
+
+
+/* Vertical list: 1 POI per line */
+.poi-list-vertical { display: grid; gap: 10px; }
+
+/* Three columns: image | title+button | description */
+.poi-row {
+  display: grid;
+  grid-template-columns: 128px minmax(180px, 1fr) 2fr;
+  gap: 12px;
+  align-items: start;
+}
+
+/* Left: image */
+.poi-row-thumb {
+  width: 128px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+/* Middle: title + button */
+.poi-row-middle {
+  display: grid;
+  grid-template-rows: auto auto; /* title, actions */
+  gap: 6px;
+}
+.poi-row-title {
+  font-weight: 600;
+  line-height: 1.25;
+}
+.poi-row-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Right: description (wraps in its own column) */
+.poi-row-desc {
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+/* Responsive: stack under 720px */
+@media (max-width: 720px) {
+  .poi-row {
+    grid-template-columns: 96px 1fr; /* image | everything else */
+    grid-template-areas:
+      "thumb middle"
+      "thumb desc";
+  }
+  .poi-row-thumb { width: 96px; height: 72px; }
+  .poi-row-middle { margin-bottom: 6px; }
+  .poi-row-desc { grid-column: 2 / -1; }
+}

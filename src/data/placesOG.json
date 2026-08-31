@@ -1,0 +1,35 @@
+[
+  {
+    "id": "ashford-castle",
+    "name": "Ashford Castle",
+    "type": "stay",
+    "city": "Cong, County Mayo",
+    "lat": 53.5368,
+    "lng": -9.2851,
+    "image": "/assets/sample/ashford.jpg",
+    "shortDesc": "Grand 800-year-old castle hotel on Lough Corrib.",
+    "onePager": "<h3>Why stay</h3><ul><li>Classic castle experience</li><li>Falconry & lakeside walks</li></ul>"
+  },
+  {
+    "id": "cliffs-of-moher",
+    "name": "Cliffs of Moher",
+    "type": "poi",
+    "city": "County Clare",
+    "lat": 52.9715,
+    "lng": -9.4263,
+    "image": "/assets/sample/moher.jpg",
+    "shortDesc": "Iconic sea cliffs with epic views.",
+    "onePager": "<h3>Tips</h3><ul><li>Go early or late for fewer crowds</li><li>Wind can be intense</li></ul>"
+  },
+  {
+    "id": "guinness-storehouse",
+    "name": "Guinness Storehouse",
+    "type": "poi",
+    "city": "Dublin",
+    "lat": 53.3419,
+    "lng": -6.286,
+    "image": "/assets/sample/guinness.jpg",
+    "shortDesc": "Brewery tour ending at the Gravity Bar.",
+    "onePager": ""
+  }
+]

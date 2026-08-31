@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.DS_Store
+*.tsbuildinfo
+
+.env
+.env.*
+!.env.example
+
+# Unused 95 MB source image
+public/assets/ireland-vintage.tiff

@@ -1,0 +1,15 @@
+/* Allow tooltip text to wrap and keep it narrow */
+.leaflet-tooltip {
+  white-space: normal;      /* override Leaflet’s default nowrap */
+  max-width: 260px;         /* keep the bubble compact */
+}
+
+.leaflet-tooltip * {
+  overflow-wrap: anywhere;  /* wrap long words if needed */
+}
+
+/* (optional) do the same for popups, just in case */
+.leaflet-popup-content {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
