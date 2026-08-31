@@ -8,8 +8,44 @@
   overflow-wrap: anywhere;  /* wrap long words if needed */
 }
 
-/* (optional) do the same for popups, just in case */
-.leaflet-popup-content {
-  overflow-wrap: anywhere;
-  word-break: break-word;
+.leaflet-tooltip.marker-dialog {
+  width: min(280px, calc(100vw - 32px));
+  max-width: min(280px, calc(100vw - 32px));
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  box-shadow: 0 3px 14px rgb(0 0 0 / 28%);
+}
+
+.marker-dialog-scroll {
+  position: relative;
+  box-sizing: border-box;
+  max-height: var(--marker-dialog-max-height);
+  padding: 12px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-radius: 12px;
+}
+
+.marker-dialog-close {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  z-index: 1;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 92%);
+  color: #1f2937;
+  font: 24px/26px system-ui, sans-serif;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 25%);
+}
+
+.marker-dialog-select {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
 }

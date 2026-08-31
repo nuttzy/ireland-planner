@@ -13,8 +13,9 @@ import PwaStatus from './components/PwaStatus'
 
 const Root = () => (
   <HashRouter>
-    <header className="topbar">
-      <Link to="/" className="topbar-brand">Our Ireland Trip</Link>
+    <div className="app-shell">
+      <header className="topbar">
+        <Link to="/" className="topbar-brand">Our Ireland Trip</Link>
 
 {/* <button
   className="btn"
@@ -26,21 +27,24 @@ const Root = () => (
 >
   Map
 </button> */}
-      <nav className="topbar-nav" aria-label="Primary navigation">
-        <Link to="/?reset=1" className="btn">Map</Link>
-        <Link to="/index" className="btn">Index</Link>
-        <Link to="/itinerary" className="btn">Itinerary</Link>
-        <Link to="/editor" className="btn">Edit Data</Link>
-      </nav>
-      <PwaStatus />
-    </header>
-    <Routes>
-      <Route path="/" element={<App />} />
-      <Route path="/index" element={<IndexPage />} />
-      <Route path="/place/:id" element={<PlaceDetail />} />
-      <Route path="/editor" element={<Editor />} />
-      <Route path="/itinerary" element={<Itinerary />} />
-    </Routes>
+        <nav className="topbar-nav" aria-label="Primary navigation">
+          <Link to="/?reset=1" className="btn">Map</Link>
+          <Link to="/index" className="btn">Index</Link>
+          <Link to="/itinerary" className="btn">Itinerary</Link>
+          <Link to="/editor" className="btn">Edit Data</Link>
+        </nav>
+        <PwaStatus />
+      </header>
+      <main className="app-content">
+        <Routes>
+          <Route path="/" element={<App />} />
+          <Route path="/index" element={<IndexPage />} />
+          <Route path="/place/:id" element={<PlaceDetail />} />
+          <Route path="/editor" element={<Editor />} />
+          <Route path="/itinerary" element={<Itinerary />} />
+        </Routes>
+      </main>
+    </div>
   </HashRouter>
 )
 
