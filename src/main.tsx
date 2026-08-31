@@ -7,21 +7,9 @@ import IndexPage from './pages/IndexPage'
 import PlaceDetail from './pages/PlaceDetail'
 import Editor from './pages/Editor'
 import Itinerary from './pages/Itinerary'
+import PwaStatus from './components/PwaStatus'
 
 // const [, setSearchParams] = useSearchParams()
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js')
-  })
-}
-
-// Only register SW in production builds
-if ('serviceWorker' in navigator && import.meta.env.PROD) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js')
-  })
-}
 
 const Root = () => (
   <BrowserRouter>
@@ -44,7 +32,7 @@ const Root = () => (
       <Link to="/itinerary" className="btn">Itinerary</Link>
       <Link to="/editor" className="btn">Edit Data</Link>
       <div className="spacer" />
-      <small>Offline ready</small>
+      <PwaStatus />
     </div>
     <Routes>
       <Route path="/" element={<App />} />

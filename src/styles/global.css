@@ -13,3 +13,5 @@ a { color: #0b4f6c; text-decoration: none; }
 .map-wrap { height: calc(100vh - 58px); }
 .tooltip-img { width: 180px; height: 100px; object-fit: cover; border-radius: 8px; display: block; margin-bottom: 6px; }
 .muted { color: #6b7280; }
+.pwa-status { white-space: nowrap; }
+.pwa-status.btn { padding: 0.3rem 0.55rem; }
