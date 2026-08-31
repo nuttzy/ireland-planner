@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { MapContainer, Marker, Popup, Tooltip, useMap, FeatureGroup } from 'react-leaflet'
+import { MapContainer, Marker, Tooltip, useMap, useMapEvents, FeatureGroup } from 'react-leaflet'
 import L from 'leaflet'
 import { ImageOverlay, Pane } from 'react-leaflet'
 import { Link, useSearchParams } from 'react-router-dom'
@@ -23,6 +23,8 @@ import castleGrayPng from '/src/icons/pin-castle-gray.png'
 
 const DEFAULT_CENTER: [number, number] = [53.4, -8.2]
 const DEFAULT_ZOOM = 7
+const IMAGE_BOUNDS: L.LatLngBoundsExpression = [[51.39, -10.66], [55.43, -5.43]]
+const MAP_BOUNDS: L.LatLngBoundsExpression = [[50.9, -11.25], [55.9, -4.75]]
 const HOVER_QUERY = '(hover: hover) and (pointer: fine)'
 const places = placesData as Place[]
 
@@ -173,7 +175,23 @@ const TOOLTIP_BOTTOM_OFFSET: [number, number] = [0, 18]
 const TOOLTIP_TOP_GAP = 42
 const TOOLTIP_BOTTOM_GAP = 18
 
-const BoundaryAwareTooltip: React.FC<{ place: Place }> = ({ place }) => {
+type BoundaryAwareTooltipProps = {
+  place: Place
+  children?: React.ReactNode
+  permanent?: boolean
+  interactive?: boolean
+  className?: string
+  constrainHeight?: boolean
+}
+
+const BoundaryAwareTooltip: React.FC<BoundaryAwareTooltipProps> = ({
+  place,
+  children,
+  permanent = false,
+  interactive = false,
+  className,
+  constrainHeight = false,
+}) => {
   const map = useMap()
   const tooltipRef = React.useRef<L.Tooltip | null>(null)
   const frameRef = React.useRef<number | null>(null)
@@ -184,8 +202,17 @@ const BoundaryAwareTooltip: React.FC<{ place: Place }> = ({ place }) => {
     const element = tooltip.getElement()
     if (!element) return
 
+    if (interactive) {
+      L.DomEvent.disableClickPropagation(element)
+      L.DomEvent.disableScrollPropagation(element)
+    }
+
+    if (constrainHeight) {
+      element.style.removeProperty('--marker-dialog-max-height')
+    }
+
     const markerPoint = map.latLngToContainerPoint([place.lat, place.lng])
-    const tooltipHeight = element.offsetHeight
+    const tooltipHeight = element.scrollHeight
     const mapHeight = map.getSize().y
     const spaceAbove = markerPoint.y - TOOLTIP_EDGE_PADDING - TOOLTIP_TOP_GAP
     const spaceBelow = mapHeight - markerPoint.y - TOOLTIP_EDGE_PADDING - TOOLTIP_BOTTOM_GAP
@@ -194,10 +221,18 @@ const BoundaryAwareTooltip: React.FC<{ place: Place }> = ({ place }) => {
       spaceAbove >= tooltipHeight || spaceAbove >= spaceBelow ? 'top' : 'bottom'
     const offset = direction === 'top' ? TOOLTIP_TOP_OFFSET : TOOLTIP_BOTTOM_OFFSET
 
+    if (constrainHeight) {
+      const availableSpace = direction === 'top' ? spaceAbove : spaceBelow
+      element.style.setProperty(
+        '--marker-dialog-max-height',
+        `${Math.max(80, Math.floor(availableSpace - 8))}px`
+      )
+    }
+
     tooltip.options.direction = direction
     tooltip.options.offset = L.point(offset)
     tooltip.update()
-  }, [map, place.lat, place.lng])
+  }, [constrainHeight, interactive, map, place.lat, place.lng])
 
   const schedulePosition = React.useCallback((event?: L.LeafletEvent) => {
     const tooltip = (event?.target as L.Tooltip | undefined) ?? tooltipRef.current
@@ -226,10 +261,102 @@ const BoundaryAwareTooltip: React.FC<{ place: Place }> = ({ place }) => {
       direction="top"
       offset={TOOLTIP_TOP_OFFSET}
       opacity={1}
+      permanent={permanent}
+      interactive={interactive}
+      className={className}
       eventHandlers={{ add: schedulePosition }}
     >
-      <TooltipBody place={place} />
+      {children ?? <TooltipBody place={place} />}
     </Tooltip>
+  )
+}
+
+const DialogCloseController: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+  useMapEvents({ click: onClose })
+  return null
+}
+
+type MarkerDialogProps = {
+  place: Place
+  assignedDay: number | null
+  dayLabels: Record<string, string>
+  assignPoiToDay: (poiId: string, day: number | null) => void
+  onClose: () => void
+}
+
+const MarkerDialog: React.FC<MarkerDialogProps> = ({
+  place,
+  assignedDay,
+  dayLabels,
+  assignPoiToDay,
+  onClose,
+}) => {
+  React.useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [onClose])
+
+  return (
+    <BoundaryAwareTooltip
+      place={place}
+      permanent
+      interactive
+      className="marker-dialog"
+      constrainHeight
+    >
+      <div className="marker-dialog-scroll" role="dialog" aria-label={place.name}>
+        <button
+          type="button"
+          className="marker-dialog-close"
+          aria-label={`Close ${place.name}`}
+          onClick={onClose}
+        >
+          &times;
+        </button>
+        <img
+          className="popup-img"
+          src={assetUrl(place.image || '/assets/placeholder.jpg')}
+          alt=""
+        />
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <div className="pill">{place.type === 'stay' ? 'Stay' : 'POI'}</div>
+          {place.type === 'poi' && (
+            <span className={`pill ${assignedDay ? 'pill--planned' : 'pill--muted'}`}>
+              {assignedDay ? `Day ${assignedDay}` : 'Unassigned'}
+            </span>
+          )}
+        </div>
+        <h3 style={{ margin: '8px 0' }}>{place.name}</h3>
+        <p className="muted">{place.shortDesc}</p>
+        <div style={{ marginTop: 8 }}>
+          <label className="muted" style={{ display: 'block', marginBottom: 4 }}>
+            Add to itinerary:
+          </label>
+          <select
+            value={assignedDay ?? ''}
+            onChange={event =>
+              assignPoiToDay(
+                place.id,
+                event.target.value ? Number(event.target.value) : null
+              )
+            }
+            className="btn marker-dialog-select"
+            style={{ padding: '0.4rem 0.5rem' }}
+          >
+            <option value="">— Not assigned —</option>
+            {Object.entries(dayLabels).map(([day, label]) => (
+              <option key={day} value={day}>{label}</option>
+            ))}
+          </select>
+        </div>
+        <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+          <Link to={`/place/${place.id}`} className="btn primary">Open one‑pager</Link>
+        </div>
+      </div>
+    </BoundaryAwareTooltip>
   )
 }
 
@@ -238,12 +365,13 @@ const App: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const focusId = searchParams.get('focus')
   const supportsHover = useSupportsHover()
-  const [openPopupId, setOpenPopupId] = React.useState<string | null>(null)
-  const markerRefs = React.useRef(new Map<string, L.Marker>())
+  const [openDialogId, setOpenDialogId] = React.useState<string | null>(null)
 
-  const openFocusedPopup = React.useCallback((id: string) => {
-    markerRefs.current.get(id)?.openPopup()
+  const openFocusedDialog = React.useCallback((id: string) => {
+    setOpenDialogId(id)
   }, [])
+
+  const closeDialog = React.useCallback(() => setOpenDialogId(null), [])
 
   const { selected, counts, toggle, selectAll, setOnly, filterPlaces, ALL_SOURCES } =
     useSourceFilters(places);  
@@ -293,16 +421,22 @@ const App: React.FC = () => {
         onOnly={setOnly}
       />
       <MapContainer
+        className="trip-map"
         center={DEFAULT_CENTER}
-        zoom={DEFAULT_ZOOM} 
-        style={{ height: '100%', width: '100%', background: '#f3f4f6' }} 
+        zoom={DEFAULT_ZOOM}
+        minZoom={DEFAULT_ZOOM}
+        maxBounds={MAP_BOUNDS}
+        maxBoundsViscosity={1}
+        bounceAtZoomLimits={false}
+        style={{ background: '#f3f4f6' }}
         zoomControl={true}>
-        <FocusController places={places} onFocusReady={openFocusedPopup} />
+        <FocusController places={places} onFocusReady={openFocusedDialog} />
+        <DialogCloseController onClose={closeDialog} />
 
         <Pane name="basemap" style={{ zIndex: 200 }}>
           <ImageOverlay
             url={assetUrl('/assets/ireland-vintage02.jpeg')}
-            bounds={[[51.39, -10.66], [55.43, -5.43]]}   // SW, NE corners of Ireland (with a little padding)
+            bounds={IMAGE_BOUNDS}
             opacity={0.95}
           />
         </Pane>
@@ -325,65 +459,28 @@ const App: React.FC = () => {
           return (
             <Marker
               key={p.id}
-              ref={marker => {
-                if (marker) markerRefs.current.set(p.id, marker)
-                else markerRefs.current.delete(p.id)
-              }}
               position={[p.lat, p.lng]}
               icon={icon}
               eventHandlers={{
-                popupopen: event => {
-                  ;(event.target as L.Marker).closeTooltip()
-                  setOpenPopupId(p.id)
-                },
-                popupclose: () => {
-                  setOpenPopupId(current => current === p.id ? null : current)
+                click: event => {
+                  L.DomEvent.stopPropagation(event.originalEvent)
+                  setOpenDialogId(p.id)
                 },
               }}
             >
-              {supportsHover && openPopupId === null && (
+              {supportsHover && openDialogId === null && (
                 <BoundaryAwareTooltip place={p} />
               )}
 
-
-              <Popup>
-                <div style={{ maxWidth: 240 }}>
-                  <img
-                    className="popup-img"
-                    src={assetUrl(p.image || '/assets/placeholder.jpg')}
-                    alt=""
-                  />
-                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                    <div className="pill">{p.type === 'stay' ? 'Stay' : 'POI'}</div>
-                    {p.type === 'poi' && (
-                      <span className={`pill ${assignedDay ? 'pill--planned' : 'pill--muted'}`}>
-                        {assignedDay ? `Day ${assignedDay}` : 'Unassigned'}
-                      </span>
-                    )}
-                  </div>
-                  <h3 style={{ margin: '8px 0' }}>{p.name}</h3>
-                  <p className="muted">{p.shortDesc}</p>
-                  <div style={{ marginTop: 8 }}>
-
-                    <label className="muted" style={{ display:'block', marginBottom:4 }}>Add to itinerary:</label>
-                    <select
-                      value={assignedDay ?? ''}
-                      onChange={e => assignPoiToDay(p.id, e.target.value ? Number(e.target.value) : null)}
-                      className="btn" style={{ padding:'0.4rem 0.5rem' }}
-                    >
-                      <option value="">— Not assigned —</option>
-                      {Object.entries(dayLabels).map(([d,label]) => (
-                        <option key={d} value={d}>{label}</option>
-                      ))}
-                    </select>
-
-                  </div>
-
-                  <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-                    <Link to={`/place/${p.id}`} className="btn primary">Open one‑pager</Link>
-                  </div>
-                </div>
-              </Popup>
+              {openDialogId === p.id && (
+                <MarkerDialog
+                  place={p}
+                  assignedDay={assignedDay}
+                  dayLabels={dayLabels}
+                  assignPoiToDay={assignPoiToDay}
+                  onClose={closeDialog}
+                />
+              )}
             </Marker>
 
           )
