@@ -13,8 +13,8 @@ import PwaStatus from './components/PwaStatus'
 
 const Root = () => (
   <HashRouter>
-    <div className="topbar">
-      <Link to="/" style={{ color: 'white', fontWeight: 700 }}>Our Ireland Trip</Link>
+    <header className="topbar">
+      <Link to="/" className="topbar-brand">Our Ireland Trip</Link>
 
 {/* <button
   className="btn"
@@ -26,14 +26,14 @@ const Root = () => (
 >
   Map
 </button> */}
-      <Link to="/?reset=1" className="btn">Map</Link>
-
-      <Link to="/index" className="btn">Index</Link>
-      <Link to="/itinerary" className="btn">Itinerary</Link>
-      <Link to="/editor" className="btn">Edit Data</Link>
-      <div className="spacer" />
+      <nav className="topbar-nav" aria-label="Primary navigation">
+        <Link to="/?reset=1" className="btn">Map</Link>
+        <Link to="/index" className="btn">Index</Link>
+        <Link to="/itinerary" className="btn">Itinerary</Link>
+        <Link to="/editor" className="btn">Edit Data</Link>
+      </nav>
       <PwaStatus />
-    </div>
+    </header>
     <Routes>
       <Route path="/" element={<App />} />
       <Route path="/index" element={<IndexPage />} />
