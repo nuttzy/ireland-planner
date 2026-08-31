@@ -12,7 +12,7 @@ import { SourceFilterBar } from './components/SourceFilterBar';
 import 'leaflet/dist/leaflet.css'
 import './components/leaflet.css'
 import './styles/itinerary.css'
-import places from './data/places.json'
+import placesData from './data/places.json'
 
 import poiPng from '/src/icons/pin-poi.png'
 import castlePng from '/src/icons/pin-castle.png'
@@ -22,9 +22,16 @@ import castleGrayPng from '/src/icons/pin-castle-gray.png'
 
 const DEFAULT_CENTER: [number, number] = [53.4, -8.2]
 const DEFAULT_ZOOM = 7
+const places = placesData as Place[]
 
 const makeIcon = (url: string) =>
-  new L.Icon({ iconUrl: url, iconSize: [26, 38], iconAnchor: [13, 38], popupAnchor: [0, -32] })
+  new L.Icon({
+    iconUrl: url,
+    iconSize: [26, 38],
+    iconAnchor: [13, 38],
+    popupAnchor: [0, -32],
+    tooltipAnchor: [13, -10],
+  })
 const poiIconGreen = makeIcon(poiGreenPng)
 
 const poiIcon = new L.Icon({
