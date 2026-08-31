@@ -28,7 +28,7 @@
     "city": "Ballyfarnon, County Roscommon",
     "lat": 54.06361,
     "lng": -8.18278,
-    "image": "/assets/stays/kilronan-castle.png",
+    "image": "/assets/stays/kilronan-castle.jpg",
     "source": "Personal",
     "shortDesc": "19th-century castle on Lough Meelagh with woodland walks and spa."
   },
@@ -39,7 +39,7 @@
     "city": "Ennis, County Clare",
     "lat": 52.8392,
     "lng": -8.9833,
-    "image": "/assets/stays/hotel-woodstock.png",
+    "image": "/assets/stays/hotel-woodstock.jpg",
     "source": "2018",
     "shortDesc": "Comfortable base on the edge of Ennis, handy for the Burren & Cliffs of Moher."
   },
@@ -50,7 +50,7 @@
     "city": "Dunboyne, County Meath (Dublin area)",
     "lat": 53.417487,
     "lng": -6.479341,
-    "image": "/assets/stays/dunboyne-castle.png",
+    "image": "/assets/stays/dunboyne-castle.jpg",
     "source": "2018",
     "shortDesc": "Georgian manor-style hotel with spa, an easy hop to/from Dublin."
   },
@@ -82,7 +82,7 @@
     "city": "Kingscourt, County Cavan",
     "lat": 53.9009,
     "lng": -6.7912,
-    "image": "/assets/poi/cabra-castle.png",
+    "image": "/assets/poi/cabra-castle.jpg",
     "source": "Personal",
     "shortDesc": "Historic castle hotel on a 100-acre estate beside Dún a’ Rí Forest Park."
   },
@@ -307,7 +307,7 @@
   "city": "Kinvara, County Galway",
   "lat": 53.139,
   "lng": -8.930,
-  "image": "/assets/poi/Dunguaire_Castle.png",
+  "image": "/assets/poi/Dunguaire_Castle.jpg",
   "source": "Personal",
   "shortDesc": "Picturesque 16th-century tower house on Galway Bay with a walled bawn; coastal views toward the Burren."
 },
