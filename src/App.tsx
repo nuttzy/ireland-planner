@@ -130,6 +130,73 @@ const TooltipBody: React.FC<{ place: Place }> = ({ place }) => (
   </>
 )
 
+const TOOLTIP_EDGE_PADDING = 12
+const TOOLTIP_TOP_OFFSET: [number, number] = [0, -32]
+const TOOLTIP_BOTTOM_OFFSET: [number, number] = [0, 18]
+const TOOLTIP_TOP_GAP = 42
+const TOOLTIP_BOTTOM_GAP = 18
+
+const BoundaryAwareTooltip: React.FC<{ place: Place; permanent: boolean }> = ({ place, permanent }) => {
+  const map = useMap()
+  const tooltipRef = React.useRef<L.Tooltip | null>(null)
+  const frameRef = React.useRef<number | null>(null)
+
+  const positionTooltip = React.useCallback((tooltip: L.Tooltip | null) => {
+    if (!tooltip || !map.hasLayer(tooltip)) return
+
+    const element = tooltip.getElement()
+    if (!element) return
+
+    const markerPoint = map.latLngToContainerPoint([place.lat, place.lng])
+    const tooltipHeight = element.offsetHeight
+    const mapHeight = map.getSize().y
+    const spaceAbove = markerPoint.y - TOOLTIP_EDGE_PADDING - TOOLTIP_TOP_GAP
+    const spaceBelow = mapHeight - markerPoint.y - TOOLTIP_EDGE_PADDING - TOOLTIP_BOTTOM_GAP
+
+    const direction =
+      spaceAbove >= tooltipHeight || spaceAbove >= spaceBelow ? 'top' : 'bottom'
+    const offset = direction === 'top' ? TOOLTIP_TOP_OFFSET : TOOLTIP_BOTTOM_OFFSET
+
+    tooltip.options.direction = direction
+    tooltip.options.offset = L.point(offset)
+    tooltip.update()
+  }, [map, place.lat, place.lng])
+
+  const schedulePosition = React.useCallback((event?: L.LeafletEvent) => {
+    const tooltip = (event?.target as L.Tooltip | undefined) ?? tooltipRef.current
+    if (!tooltip || !map.hasLayer(tooltip)) return
+
+    if (frameRef.current !== null) cancelAnimationFrame(frameRef.current)
+    frameRef.current = requestAnimationFrame(() => {
+      frameRef.current = requestAnimationFrame(() => {
+        frameRef.current = null
+        positionTooltip(tooltip)
+      })
+    })
+  }, [map, positionTooltip])
+
+  React.useEffect(() => {
+    map.on('moveend zoomend resize', schedulePosition)
+    return () => {
+      map.off('moveend zoomend resize', schedulePosition)
+      if (frameRef.current !== null) cancelAnimationFrame(frameRef.current)
+    }
+  }, [map, schedulePosition])
+
+  return (
+    <Tooltip
+      ref={tooltipRef}
+      direction="top"
+      offset={TOOLTIP_TOP_OFFSET}
+      opacity={1}
+      permanent={permanent}
+      eventHandlers={{ add: schedulePosition }}
+    >
+      <TooltipBody place={place} />
+    </Tooltip>
+  )
+}
+
 const App: React.FC = () => {
   const { dayLabels, getDayForPoi, assignPoiToDay } = useItinerary()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -225,9 +292,7 @@ const App: React.FC = () => {
               </Tooltip>
               )} */}
 
-              <Tooltip direction="top" opacity={1} offset={[0, -32]} permanent={isFocused}>
-                <TooltipBody place={p} />
-              </Tooltip>
+              <BoundaryAwareTooltip place={p} permanent={isFocused} />
 
 
               <Popup>
